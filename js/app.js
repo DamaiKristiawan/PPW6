@@ -3,6 +3,7 @@
  * Sistem Informasi Data Mahasiswa (SIMA) - Waktu Praktikum: 90 Menit
  */
 
+//Deklarasikan endpoint API
 const API_URL = 'api/mahasiswa.php';
 
 // 1. Seleksi Elemen DOM Utama
@@ -31,10 +32,11 @@ function showAlert(message, type = 'success') {
 async function loadMahasiswa(keyword = '') {
     if (!tabelBody) return;
 
+    // tampilkan indikator loading
     tabelBody.innerHTML = `
         <tr>
-            <td colspan="8" style="text-align: center; padding: 20px;">
-                Memuat data mahasiswa...
+            <td colspan="8" style="text-align: center; padding: 20px; color: var(--text-muted);">
+                Memuat data dari server...
             </td>
         </tr>
     `;
@@ -43,14 +45,21 @@ async function loadMahasiswa(keyword = '') {
         const url = new URL(API_URL, window.location.href);
         if (keyword) url.searchParams.set('search', keyword);
 
+        //Percobaan 6-1 Langkah 4 susun url request
+        const url = keyword ? `${API_URL}?search=${encodeURIComponent(keyword)}` : API_URL;
+        
+        //Percobaan 6-1 Langkah 4 kirim request
         const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+
+        //Percobaan 6-1 Langkah 4 kirim ekstrak json 
         const result = await response.json();
-
-        if (!response.ok || result.status !== 'success') {
-            throw new Error(result.message || 'Gagal memuat data mahasiswa.');
+                if (result.status === 'success' && Array.isArray(result.data)) {
+                    renderTable(result.data, keyword);
+        } else {
+            showAlert(result.message, 'danger');
         }
-
-        renderTable(result.data, keyword);
+      
     } catch (error) {
         const row = document.createElement('tr');
         const cell = document.createElement('td');
@@ -246,7 +255,7 @@ if (formTambah) {
             showAlert(`Terjadi kesalahan koneksi: ${error.message}`, 'danger');
         }
     });
-}
+
 
 // 5. Fetch API DELETE: Menghapus Data Secara Asinkron
 async function deleteMahasiswa(id, nama) {
