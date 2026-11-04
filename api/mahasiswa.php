@@ -166,9 +166,10 @@ function handlePut(PDO $pdo, ?int $id): void {
     }
 
     $input = json_decode(file_get_contents('php://input'), true) ?? [];
-    $stmt = $pdo->prepare('UPDATE mahasiswa SET nama = :nama, program_studi = :prodi, angkatan = :angkatan, email = :email WHERE id = :id');
+    $stmt = $pdo->prepare('UPDATE mahasiswa SET npm = :npm, nama = :nama, program_studi = :prodi, angkatan = :angkatan, email = :email WHERE id = :id');
     $stmt->execute([
         ':id' => $id,
+        ':npm' => trim($input['npm'] ?? ''),
         ':nama' => trim($input['nama'] ?? ''),
         ':prodi' => trim($input['program_studi'] ?? ''),
         ':angkatan' => (int)($input['angkatan'] ?? 0),
